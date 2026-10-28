@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="ソース ファイル\Core">
+      <UniqueIdentifier>{65129122-e3d6-4337-b47d-602fe998a808}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Scene">
+      <UniqueIdentifier>{8c24018c-702a-4f78-944c-8f19195e0b64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Input">
+      <UniqueIdentifier>{d95a7477-6157-4b42-a129-bf4a4a4bf88e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Scene\Title">
+      <UniqueIdentifier>{cb7de477-c69e-4491-8297-2ac4aa0c9618}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Scene\Game">
+      <UniqueIdentifier>{4ca5d850-749d-46e8-a5fb-230858fd34fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Scene\Ending">
+      <UniqueIdentifier>{ade80e34-3df2-46f3-8ce9-0778b55a1e97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Object">
+      <UniqueIdentifier>{4d0ea1c5-2aa0-428c-aea2-e2f31f33b061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Object\Enemy">
+      <UniqueIdentifier>{1a51d5b9-18dc-450c-888d-c079904058c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Object\Player">
+      <UniqueIdentifier>{079b7968-afb0-44de-acc2-0b42798c7a6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Object\Map">
+      <UniqueIdentifier>{54b8d2f1-a972-404d-a6ba-aca4c8622d4e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleState.cpp">
+      <Filter>ソース ファイル\Scene\Title</Filter>
+    </ClCompile>
+    <ClCompile Include="StartGameState.cpp">
+      <Filter>ソース ファイル\Scene\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="EndingState.cpp">
+      <Filter>ソース ファイル\Scene\Ending</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>ソース ファイル\Object\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>ソース ファイル\Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>ソース ファイル\Object\Map</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GameManager.h">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyReader.h">
+      <Filter>ソース ファイル\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseReader.h">
+      <Filter>ソース ファイル\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleState.h">
+      <Filter>ソース ファイル\Scene\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="StartGameState.h">
+      <Filter>ソース ファイル\Scene\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="EndingState.h">
+      <Filter>ソース ファイル\Scene\Ending</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>ソース ファイル\Object\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>ソース ファイル\Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>ソース ファイル\Object\Map</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+</Project>
