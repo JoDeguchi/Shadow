@@ -58,9 +58,12 @@ public:
 	void DrawLight(const Map& map) const;   
 
 	// プレイヤーがライトに入っているか判定して alert を更新する
-	void CheckPlayer(const Map& map, float px, float py);
+	void CheckPlayer(const Map& map, float px, float py,bool playerHidden);
 	// 巡回の処理
 	void Patrol(const Map& map, float dt);   
 	//	敵の回転
 	void Rotate(float dt);
+
+	//	発見！
+	bool IsAlert() const { return alert; }
 };

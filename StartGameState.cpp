@@ -43,14 +43,26 @@ void StartGameState::Update()
 	lastTime = now;
 	if (dt > 0.05f) dt = 0.05f;   // 長い停止で瞬間移動しないように
 
-	
+	const bool hidden = player.IsInShadow() && !player.IsMoving();
 
 	for (Enemy& e : enemies) {
 		e.Update(map, dt);
-		e.CheckPlayer(map, player.GetX(), player.GetY());
+		e.CheckPlayer(map, player.GetX(), player.GetY(),hidden);
+
+		// 1体でも見つけたら即ゲームオーバーにする
+		if (e.IsAlert()) {
+			
+			isFound = true;
+			break;
+		}
 	}
 	//------------------------------------------------
 	//	プレイヤー
+
+	if (isFound) {
+		return;
+	}
+
 	if (!isGoal) {
 		player.Update(map);
 
@@ -59,8 +71,6 @@ void StartGameState::Update()
 			isGoal = true;
 		}
 	}
-
-
 }
 
 void StartGameState::Draw()
@@ -75,11 +85,6 @@ void StartGameState::Draw()
 	for (Enemy& e : enemies) {
 		e.Draw();
 	}
-	//	これまでのやつ（上と同じ）
-	/*for (size_t i = 0; i < enemies.size(); i++) {
-		enemies[i].Draw();
-	}*/
-
 	player.Draw();
 
 	if (isGoal)
@@ -87,6 +92,10 @@ void StartGameState::Draw()
 		SetFontSize(48);
 		DrawString(480, 280, "GOAL!", GetColor(255, 255, 0));
 		SetFontSize(16);
+	}
+
+	if (isFound) {
+		DrawString(480, 280, "GAME OVER!", GetColor(255, 255, 0));
 	}
 
 	ScreenFlip();

@@ -13,6 +13,8 @@ private:
 	int anim_count = 0;		//	アニメーションのコマ数
 	int anim_frame = 0;		//	アニメフレーム
 	bool isMoving = false;	//　キーでアニメを動かすためのフラグ
+
+	bool inShadow = false;   // 影の中にいるか
 	
 	float fx = 0, fy = 0;   // float の座標(pos_x, pos_y は描画用)
 
@@ -34,5 +36,9 @@ public:
 	float GetY() const { return fy; }
 	// 体の中心がゴールタイルにいるか
 	bool IsOnGoal(const Map& map) const;  
+	//	影の中か
+	bool IsInShadow() const { return inShadow; }
+	//	動いているか
+	bool IsMoving() const { return isMoving; }
 	
 };

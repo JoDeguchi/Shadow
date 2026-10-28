@@ -17,6 +17,7 @@ private:
     int lastTime = 0;
 
     bool isGoal = false;	//	ゴール地点にいるか
+    bool isFound = false;   //  敵に見つかったか
 
 public:
 

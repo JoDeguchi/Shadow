@@ -140,9 +140,13 @@ void Enemy::RayEnd(const Map& map, float direction,
 	endY = pos_y + moveY * distance;
 }
 
-void Enemy::CheckPlayer(const Map& map, float px, float py)
+void Enemy::CheckPlayer(const Map& map, float px, float py,bool playerHidden)
 {
 	alert = false;
+
+	// 影の中にいる間は見つからない
+	if (playerHidden) return;
+
 	//	敵からプレイヤーまでの距離
 	const float dx = px - pos_x;
 	const float dy = py - pos_y;

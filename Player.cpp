@@ -9,7 +9,7 @@ namespace {
 	constexpr int FRAME_WIDTH	= 75;
 	constexpr int FRAME_HEIGHT	= 95;
 	// 動きの設定
-	constexpr float MOVE_SPEED		= 1.0f;		// 1フレームに進むpx
+	constexpr float MOVE_SPEED		= 3.0f;		// 1フレームに進むpx
 	constexpr int   ANIM_INTERVAL	= 10;		// 何フレームでコマを変えるか
 	constexpr float DRAW_SCALE		= 1.0f;
 	// 向き(画像は下向きが0度として回転させる)
@@ -89,6 +89,10 @@ void Player::Update(const Map& map)
 		SetPos(static_cast<int>(fx), static_cast<int>(fy));
 	}
 
+	// ---- 影の判定 ----
+	// 足元(中心)のタイルが影かどうか
+	inShadow = map.IsShadow(fx, fy);
+
 	// ---- アニメーション ----
 	if (isMoving) {
 		anim_frame++;
@@ -111,6 +115,13 @@ void Player::Draw()
 	//	ラジアンに変換
 	const double angle = rot_y * DX_PI / 180.0;
 
+	// 影の中で止まっているときだけ、半透明で暗くする
+	const bool hiding = inShadow && !isMoving;
+	if (hiding) {
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+		SetDrawBright(110, 140, 190);
+	}
+
 	// 画像の一部分だけを描画
 	DrawRectRotaGraph(
 		pos_x, pos_y,            // 画面上の描画位置
@@ -122,6 +133,10 @@ void Player::Draw()
 		graph_hnd,
 		TRUE
 	);
+
+	// 必ず元に戻す
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetDrawBright(255, 255, 255);
 }
 
 //	プレイヤーの中心がゴールにいるか
