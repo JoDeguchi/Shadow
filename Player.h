@@ -10,8 +10,9 @@ class Player:public GraphDraw
 {
 private:
 
-	int anim_count = 0;		//	アニメーションのコマ数
+	//int anim_count = 0;		//	アニメーションのコマ数
 	int anim_frame = 0;		//	アニメフレーム
+	int anim_step = 0;
 	bool isMoving = false;	//　キーでアニメを動かすためのフラグ
 
 	bool inShadow = false;   // 影の中にいるか

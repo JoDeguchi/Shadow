@@ -7,6 +7,7 @@ class Map;	//	前方宣言
 class Enemy:public GraphDraw
 {
 private:
+
 	static constexpr int TILE_SIZE = 32;		//	タイルの大きさ
 	static constexpr float PI = 3.14159265f;	//	円周率	
 
@@ -16,8 +17,8 @@ private:
 	//------------------------------------------------------------
 	// ライト関連
 	// ライト(視界)の設定
-	static constexpr float FOV = 70.0f * PI / 180.0f;  // 視野角（ラジアン変換）
-	static constexpr float RANGE = 150.0f;             // 届く距離
+	static constexpr float FOV = 60.0f * PI / 180.0f;  // 視野角（ラジアン変換）
+	static constexpr float RANGE = 200.0f;             // 届く距離
 	static constexpr int   FAN_DIV = 30;               // 扇形の分割数
 
 	//	指定した方向に光を伸ばし、終点を調べる
@@ -29,7 +30,7 @@ private:
 	// アニメーション関連
 	// 画像の設定
 	static constexpr int   FRAME_W = 100;		// 1コマの幅(300÷3)
-	static constexpr int   FRAME_H = 80;		// 1コマの高さ
+	static constexpr int   FRAME_H = 150;		// 1コマの高さ
 
 	// アニメーション(巡回を作るときに使う)
 	bool isMoving = false;   // 動いているか

@@ -3,20 +3,21 @@
 //	バグの原因にもなりやすいため、defineを使わずに設計
 namespace {
 
-	constexpr int FRAME_COUNT	= 8;		//	最大８コマ
+	constexpr int FRAME_COUNT	= 5;		//	最大5コマ
 	//	1コマサイズ
-	constexpr int SOURCE_Y		= 45;		//	画像の左上
-	constexpr int FRAME_WIDTH	= 75;
-	constexpr int FRAME_HEIGHT	= 95;
+	constexpr int SOURCE_Y		= 90;		//	画像の左上
+	constexpr int FRAME_WIDTH	= 80;
+	constexpr int FRAME_HEIGHT	= 100;
 	// 動きの設定
 	constexpr float MOVE_SPEED		= 3.0f;		// 1フレームに進むpx
-	constexpr int   ANIM_INTERVAL	= 10;		// 何フレームでコマを変えるか
+	constexpr int   ANIM_INTERVAL	= 4;		// 何フレームでコマを変えるか
 	constexpr float DRAW_SCALE		= 1.0f;
+	constexpr int ANIM_ORDER[5] = { 0, 1, 2, 3, 4 };
 	// 向き(画像は下向きが0度として回転させる)
-	constexpr float ROT_DOWN	= 0.0f;
-	constexpr float ROT_LEFT	= 90.0f;
-	constexpr float ROT_RIGHT	= 270.0f;
-	constexpr float ROT_UP		= 180.0f;
+	constexpr float ROT_DOWN	= 180.0f;
+	constexpr float ROT_LEFT	= 270.0f;
+	constexpr float ROT_RIGHT	= 90.0f;
+	constexpr float ROT_UP		= 0.0f;
 
 	//	当たり判定(頭の中心からの半径)
 	constexpr float HIT_SIDE = 10.0f;   // 左右・後ろ側の半径(今までの BODY_RADIUS)
@@ -25,7 +26,7 @@ namespace {
 
 //	コンストラクタ 
 Player::Player(std::string arg_file_name, int x, int y)
-	:anim_frame(0),anim_count(0)
+	:anim_frame(0),anim_step(0)
 {
 	Load_Image(arg_file_name);
 	fx = static_cast<float>(x);
@@ -98,25 +99,30 @@ void Player::Update(const Map& map)
 		anim_frame++;
 		if (anim_frame >= ANIM_INTERVAL) {
 			anim_frame = 0;
-			anim_count = (anim_count + 1) % FRAME_COUNT;
+			anim_step = (anim_step + 1) % 4;
 		}
 	}
 	else {
 		anim_frame = 0;
-		anim_count = 0;
+		anim_step = 0;
 	}
 	
 }
 
 void Player::Draw()
 {
-	// 現在のコマの画像位置を計算
-	const int src_x = anim_count * FRAME_WIDTH;
+	// 影の中で止まっているか
+	const bool hiding = inShadow && !isMoving;
+
+	// 現在のコマの画像位置を計
+
+	int frame = ANIM_ORDER[anim_step]; 
+	const int srcX = frame * FRAME_WIDTH;
+
 	//	ラジアンに変換
 	const double angle = rot_y * DX_PI / 180.0;
 
-	// 影の中で止まっているときだけ、半透明で暗くする
-	const bool hiding = inShadow && !isMoving;
+	//	影の中で止まっていたら半透明に
 	if (hiding) {
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
 		SetDrawBright(110, 140, 190);
@@ -124,10 +130,10 @@ void Player::Draw()
 
 	// 画像の一部分だけを描画
 	DrawRectRotaGraph(
-		pos_x, pos_y,            // 画面上の描画位置
-		src_x, SOURCE_Y,         // 画像内の切り出し開始位置
-		FRAME_WIDTH,             //幅
-		FRAME_HEIGHT,            // 高さ
+		pos_x, pos_y,
+		srcX, SOURCE_Y,
+		FRAME_WIDTH,
+		FRAME_HEIGHT,
 		DRAW_SCALE,
 		angle,
 		graph_hnd,

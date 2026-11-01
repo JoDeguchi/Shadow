@@ -5,8 +5,8 @@
 namespace {
 	int sharedGraph = -1;   // 全ての敵で共有する画像ハンドル
 
-	// コマの順番:静止 → 右足前 → 静止 → 左足前 の繰り返し
-	constexpr int ANIM_ORDER[4] = { 0, 1, 0, 2 };
+	// コマの順番:静止 → 右足前 → 静止 → 左足前 → 静止 の繰り返し
+	constexpr int ANIM_ORDER[5] = { 0, 1, 2, 3, 4 };
 	constexpr int ANIM_INTERVAL = 10;   // 何フレームでコマを変えるか
 }
 
@@ -34,7 +34,7 @@ Enemy::Enemy(int tileX, int tileY, char type)
 {
 	// 画像は一回だけ読み込むように
 	if (sharedGraph == -1) {
-		sharedGraph = LoadGraph("data/police.png");  
+		sharedGraph = LoadGraph("data/kanabun.png");  
 	}
 	graph_hnd = sharedGraph;
 	//	ピクセル座標に変換（中心に）
@@ -93,11 +93,11 @@ void Enemy::Draw()
 	const int srcX = frame * FRAME_W;
 
 	// 画像は下向きなので、angle(右が0)との差を回転量にする
-	const double rot = angle - PI * 0.5f;
+	const double rot = angle + PI * 0.5f;
 
 	DrawRectRotaGraph(
 		pos_x, pos_y,        // 描画位置(画像の中心)
-		srcX, 0,             // 切り出し開始位置
+		srcX, 100 ,             // 切り出し開始位置
 		FRAME_W, FRAME_H,    // 切り出しサイズ
 		1.0f,				 // 拡大率
 		rot,                 // 回転(ラジアン)
@@ -110,7 +110,7 @@ void Enemy::Draw()
 void Enemy::RayEnd(const Map& map, float direction,
 	float& endX, float& endY) const
 {
-	// 光を進める方向
+	//	光を進める方向（角度を使う）
 	//	角度０度のときはXは１Yは０
 	float moveX = cos(direction);
 	float moveY = sin(direction);
@@ -123,7 +123,7 @@ void Enemy::RayEnd(const Map& map, float direction,
 	{
 		distance += 4.0f;
 
-		// 光が進んだ先の座標
+		// 光が進んだ先の座標　この距離(distance)まで
 		float checkX = pos_x + moveX * distance;
 		float checkY = pos_y + moveY * distance;
 

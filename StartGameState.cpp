@@ -10,7 +10,7 @@ void StartGameState::Init()
 	float sx = 0.0f, sy = 0.0f;
 	map.GetStartPos(sx, sy);
 	player=Player
-	("data/spy.png", static_cast<int>(sx), static_cast<int>(sy));
+	("data/konohamusi.png", static_cast<int>(sx), static_cast<int>(sy));
 
 	// 敵を配置(タイル座標x, タイル座標y, 種類)
 	enemies.clear();
@@ -81,11 +81,18 @@ void StartGameState::Draw()
 		e.DrawLight(map);      // ① ライト(床の上、敵の下)
 	}
 
+	
+
+	map.DrawLeaves();
+
+	 
+	player.Draw();
+
 	//	範囲for文
 	for (Enemy& e : enemies) {
 		e.Draw();
 	}
-	player.Draw();
+	
 
 	if (isGoal)
 	{
