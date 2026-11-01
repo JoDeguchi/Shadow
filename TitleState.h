@@ -4,16 +4,26 @@
 #include "KeyReader.h"
 #include "Graph.h"
 
+#define LIGHT_COUNT 10
+
+struct LightParticle
+{
+	float x, y;
+	float speed;
+	int size;
+};
+
+
 class TitleState :public GameState
 {
 private:
 
 	KeyReader key;
 
-	GraphDraw rogo;
 	GraphDraw bg;
-	GraphDraw SpaceStart;
 
+	LightParticle light[LIGHT_COUNT];
+	
 public:
 
 	TitleState(GameManager* mgr) : GameState(mgr) {}

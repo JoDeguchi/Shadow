@@ -296,3 +296,24 @@ void Enemy::Rotate(float dt)
 	angle = NormalizeAngle(angle + ROTATE_SPEED * dt);
 	isMoving = false;   // 足踏みはしない(静止コマのまま)
 }
+
+//	プレイヤーの方を向く(発見後に使う)
+void Enemy::LookAt(float tx, float ty, float dt)
+{
+	isMoving = false;   // 止まる(歩きアニメも止める)
+
+	const float target = std::atan2(ty - fy, tx - fx);
+	const float diff = NormalizeAngle(target - angle);
+	const float step = TURN_SPEED * dt;
+
+	if (std::fabs(diff) <= step) {
+		angle = target;
+	}
+	else {
+		angle = NormalizeAngle(angle + (diff > 0 ? step : -step));
+	}
+
+	// アニメを静止コマに
+	anim_timer = 0;
+	anim_step = 0;
+}

@@ -18,6 +18,9 @@ private:
 
     bool isGoal = false;	//	ゴール地点にいるか
     bool isFound = false;   //  敵に見つかったか
+    Enemy* foundEnemy = nullptr;   // 見つけた敵
+
+	int timer = 0;  //  ゴール後もしくは見つかったときのtimer
 
 public:
 

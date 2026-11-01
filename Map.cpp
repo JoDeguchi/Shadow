@@ -48,27 +48,22 @@ void Map::Init()
         tiles[y][MAP_W - 1] = '#';
     }
 
-    //// 壁を配置
-    //for (int x = 8; x < 15; x++)
-    //{
-    //    tiles[5][x] = '#';
-    //}
-
     logs.clear();
 
-    // 縦の倒木(x=12, y=6〜14)
+    // 縦の倒木(x=12, y=6～14)
     for (int y = 6; y < 15; y++)
     {
         tiles[y][12] = 'T';
     }
     logs.push_back({
-        12 * TILE_SIZE + TILE_SIZE / 2.0f,        // 中心X
+		12 * TILE_SIZE + TILE_SIZE / 2.0f,        // ピクセル座標左端＋半分
         6 * TILE_SIZE + 9 * TILE_SIZE / 2.0f,     // 中心Y(9マス分の真ん中)
         9.0f * TILE_SIZE,
         true
-        });
+        }
+    );
 
-    // 横の倒木(y=10, x=20〜27)
+    // 横の倒木(y=10, x=20～27)
     for (int x = 20; x < 28; x++)
     {
         tiles[10][x] = 'T';

@@ -67,4 +67,6 @@ public:
 
 	//	発見！
 	bool IsAlert() const { return alert; }
+	// プレイヤーの方を向く(発見後に使う)
+	void LookAt(float tx, float ty, float dt);
 };

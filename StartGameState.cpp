@@ -12,11 +12,14 @@ void StartGameState::Init()
 	player=Player
 	("data/konohamusi.png", static_cast<int>(sx), static_cast<int>(sy));
 
-	// 敵を配置(タイル座標x, タイル座標y, 種類)
+	//	すべて初期化
 	enemies.clear();
+	foundEnemy = nullptr;	timer = 0;
+	isFound = false;		isGoal = false;
+	// 敵を配置(タイル座標x, タイル座標y, 種類)
 	enemies.push_back(Enemy(18, 14, 'h'));  // 横巡回の予定
-	enemies.push_back(Enemy(25, 6, 'r'));  // 回転の予定
-	enemies.push_back(Enemy(5, 10, 'v'));  // 縦巡回予定
+	enemies.push_back(Enemy(25, 6, 'r'));   // 回転の予定
+	enemies.push_back(Enemy(5, 10, 'v'));   // 縦巡回予定
 
 	lastTime = GetNowCount();
 }
@@ -24,14 +27,6 @@ void StartGameState::Init()
 void StartGameState::Input()
 {
 	key.Read();	//	キーの読み込み
-
-	//	エンターキーでゲーム画面へ
-	if (key.CheckReleaseKey(KEY_INPUT_RETURN)) {
-
-		manager->ChangeState(
-			std::make_unique<EndingState>(manager)
-		);
-	}
 }
 
 void StartGameState::Update()
@@ -46,24 +41,31 @@ void StartGameState::Update()
 	const bool hidden = player.IsInShadow() && !player.IsMoving();
 
 	for (Enemy& e : enemies) {
-		e.Update(map, dt);
-		e.CheckPlayer(map, player.GetX(), player.GetY(),hidden);
 
-		// 1体でも見つけたら即ゲームオーバーにする
-		if (e.IsAlert()) {
-			
-			isFound = true;
-			break;
+		// 見つけた敵は止まって、プレイヤーの方を向くだけ
+		if (isFound && &e == foundEnemy) {
+			e.LookAt(player.GetX(), player.GetY(), dt);
+			continue;
+		}
+
+		// それ以外の敵は、発見後も巡回を続ける
+		e.Update(map, dt);
+
+		// 発見の判定は、まだ誰も見つけていないときだけ
+		if (!isFound) {
+			e.CheckPlayer(map, player.GetX(), player.GetY(), hidden);
+
+			if (e.IsAlert()) {
+				isFound = true;
+				foundEnemy = &e;   // 最初に見つけた敵を覚える
+			}
 		}
 	}
+
 	//------------------------------------------------
-	//	プレイヤー
+	//	プレイヤー処理とエンディング切替
 
-	if (isFound) {
-		return;
-	}
-
-	if (!isGoal) {
+	if (!isGoal && !isFound) {
 		player.Update(map);
 
 		if (player.IsOnGoal(map))
@@ -71,7 +73,32 @@ void StartGameState::Update()
 			isGoal = true;
 		}
 	}
+	//-----------------------------------------------------------------
+	//	エンディング切替
+	if (isFound) {
+		timer++;
+		if (timer > 120) {
+			manager->ChangeState(
+				std::make_unique<EndingState>(manager, EndingType::Found)
+			);
+		}
+		return;
+	}
+
+	if (isGoal) {
+		timer++;
+		if (timer > 120) {
+			manager->ChangeState(
+				std::make_unique<EndingState>(manager, EndingType::Goal)
+			);
+		}
+	}
+
+	//	バグ対策。見つかったらゴールは無効、ゴールしたら見つかりは無効
+	if (isFound) isGoal = false;  
+	if (isGoal) isFound = false;
 }
+
 
 void StartGameState::Draw()
 {
@@ -81,11 +108,8 @@ void StartGameState::Draw()
 		e.DrawLight(map);      // ① ライト(床の上、敵の下)
 	}
 
-	
-
 	map.DrawLeaves();
 
-	 
 	player.Draw();
 
 	//	範囲for文
@@ -98,11 +122,11 @@ void StartGameState::Draw()
 	{
 		SetFontSize(48);
 		DrawString(480, 280, "GOAL!", GetColor(255, 255, 0));
-		SetFontSize(16);
 	}
 
 	if (isFound) {
-		DrawString(480, 280, "GAME OVER!", GetColor(255, 255, 0));
+		SetFontSize(48);
+		DrawString(450, 280, "見つかってしまった！", GetColor(255, 0, 0));
 	}
 
 	ScreenFlip();
