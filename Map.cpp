@@ -1,139 +1,170 @@
 ﻿#include "Map.h"
 #include <cmath>
+#include <string>
+#include <cstdio>
 
+// 葉っぱ
+struct Leaf {
+    float  x, y;     // 画面上の中心(ピクセル座標)
+    double angle;    // 回転角(ラジアン)
+};
+//	倒木
+struct Log {
+    float cx, cy;      // 倒木の中心(ピクセル座標)
+    float length;      // 長さ(px)
+    bool  vertical;    // true なら縦向き
+};
+
+//  constexprで意図しない値変換バグを防止
 namespace {
-    constexpr float LEAF_SIZE = 48.0f;        // 葉っぱ1枚の表示サイズ(px)
-    constexpr int   LEAVES_PER_TILE = 3;      // 1タイルあたりの枚数
-    constexpr int   KUSA_MARGIN = 8;   // 草むらを1マスより外側へはみ出させる量(px)
-    constexpr float LOG_THICKNESS = 56.0f;   // 倒木の太さ(px)。TILE_SIZE より少し大きいと自然
+
+    //  マップサイズ
+    constexpr int TILE_SIZE = 32;
+    constexpr int MAP_W = 40;	//	横マスの数
+    constexpr int MAP_H = 20;	//	縦マスの数
+
+    // マップデータ
+    char tiles[MAP_H][MAP_W];
+
+    //----------------------------------------------------
+    //  葉っぱ
+    int leaf_hnd = -1;                          // 葉っぱ画像のハンドル
+    double leaf_scale = 1.0;
+	std::vector<Leaf> leaves;                   // 葉っぱの量 vector
+    constexpr float LEAF_SIZE = 48.0f;       
+    constexpr int   LEAVES_PER_TILE = 3;        // 1タイルあたりの枚数
+	//---------------------------------------------------
+    //  草むら
+    int kusa_hnd = -1;                          // 草むら画像のハンドル
+    constexpr int   KUSA_MARGIN = 8;            // 草むらをはみださせるピクセル量
+	//---------------------------------------------------
+    //  倒木
+    int  log_hnd = -1;
+    int  log_w = 0, log_h = 0;                  // 倒木画像の元サイズ
+    std::vector<Log> logs;
+    constexpr float LOG_THICKNESS = 56.0f;      // 倒木の太さ(px)
+
+    //int kirikabu_hnd = -1;   // 切り株画像のハンドル
+    //double kirikabu_scale = 2.0;
+
+     // # 外周の壁 / . 床 / s 影 / S スタート / G ゴール / T 倒木
+    const char* STAGE1[MAP_H] = {
+        "########################################",
+        "#SS....................................#",
+        "#SS.................sssss..............#",
+        "#...................sssss..............#",
+        "#...................sssss..............#",
+        "#......................................#",
+        "#...........T..........................#",
+        "#......ssss.T..........................#",
+        "#......ssss.T..........................#",
+        "#......ssss.T.................sssss....#",
+        "#......ssss.T.......TTTTTTTT..sssss....#",
+        "#...........T.................sssss....#",
+        "#...........T.................sssss....#",
+        "#...........T.................sssss....#",
+        "#sss........T.................sssss....#",
+        "#sss..........................sssss....#",
+        "#sss...................................#",
+        "#sss.................................GG#",
+        "#sss.................................GG#",
+        "########################################",
+    };
+
+    // 2面はまず1面のコピーで動作確認(あとで書き換える)
+    const char* STAGE2[MAP_H] = {
+        "########################################",
+        "#SS....................................#",
+        "#SS.................sssss..............#",
+        "#...................sssss..............#",
+        "#...................sssss..............#",
+        "#......................................#",
+        "#...........T..........................#",
+        "#......ssss.T..........................#",
+        "#......ssss.T..........................#",
+        "#......ssss.T..........................#",
+        "#......ssss.T.......TTTTTTTT...........#",
+        "#...........T..........................#",
+        "#...........T.................sssss....#",
+        "#...........T.................sssss....#",
+        "#sss........T..........................#",
+        "#sss..........................sssss....#",
+        "#sss...................................#",
+        "#sss.................................GG#",
+        "#sss.................................GG#",
+        "########################################",
+    };
 }
 
-// マップを初期化
-void Map::Init()
+void Map::Init(int stage)
 {
+    //  画像読み込み
     if (leaf_hnd == -1) {
         leaf_hnd = LoadGraph("data/leaf.png");
-        int w = 0, h = 0;
-        GetGraphSize(leaf_hnd, &w, &h);
-        if (w > 0) leaf_scale = LEAF_SIZE / w;   // 画像サイズに関わらずLEAF_SIZEに揃える
     }
-
     if (kusa_hnd == -1) {
         kusa_hnd = LoadGraph("data/kusamura.png");
     }
-
     if (log_hnd == -1) {
         log_hnd = LoadGraph("data/touboku.png");
         GetGraphSize(log_hnd, &log_w, &log_h);
     }
 
-    // 最初はすべて床にする
-    for (int y = 0; y < MAP_H; y++)
-    {
-        for (int x = 0; x < MAP_W; x++)
-        {
-            tiles[y][x] = '.';
+    // 文字列 → タイル
+    const char* const* data = (stage == 1) ? STAGE1 : STAGE2;
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            tiles[y][x] = data[y][x];
         }
     }
 
-    // 外周を壁にする
-    for (int x = 0; x < MAP_W; x++)
-    {
-        tiles[0][x] = '#';
-        tiles[MAP_H - 1][x] = '#';
-    }
-    for (int y = 0; y < MAP_H; y++)
-    {
-        tiles[y][0] = '#';
-        tiles[y][MAP_W - 1] = '#';
-    }
-
+    // 倒木の自動登録
     logs.clear();
 
-    // 縦の倒木(x=12, y=6～14)
-    for (int y = 6; y < 15; y++)
-    {
-        tiles[y][12] = 'T';
-    }
-    logs.push_back({
-		12 * TILE_SIZE + TILE_SIZE / 2.0f,        // ピクセル座標左端＋半分
-        6 * TILE_SIZE + 9 * TILE_SIZE / 2.0f,     // 中心Y(9マス分の真ん中)
-        9.0f * TILE_SIZE,
-        true
-        }
-    );
-
-    // 横の倒木(y=10, x=20～27)
-    for (int x = 20; x < 28; x++)
-    {
-        tiles[10][x] = 'T';
-    }
-    logs.push_back({
-        20 * TILE_SIZE + 8 * TILE_SIZE / 2.0f,    // 中心X(8マス分の真ん中)
-        10 * TILE_SIZE + TILE_SIZE / 2.0f,        // 中心Y
-        8.0f * TILE_SIZE,
-        false
-        });
-
-    // 影を配置
-    for (int y = 7; y < 11; y++)
-    {
-        for (int x = 7; x < 11; x++)
-        {
-            tiles[y][x] = 's';
+    // 横の倒木
+    for (int y = 0; y < MAP_H; y++) {
+        int x = 0;
+        while (x < MAP_W) {
+            if (tiles[y][x] != 'T') { x++; continue; }
+            const int start = x;
+            while (x < MAP_W && tiles[y][x] == 'T') x++;
+            const int len = x - start;
+            if (len >= 2) {
+                logs.push_back({ 
+                    start * TILE_SIZE + len * TILE_SIZE / 2.0f,
+                    y * TILE_SIZE + TILE_SIZE / 2.0f,
+                    static_cast<float>(len * TILE_SIZE),
+                    false
+                    });
+            }
         }
     }
 
-    for (int y = 14; y < 19; y++)
-    {
-        for (int x = 1; x < 4; x++)
-        {
-            tiles[y][x] = 's';
+    // 縦の倒木
+    for (int x = 0; x < MAP_W; x++) {
+        int y = 0;
+        while (y < MAP_H) {
+            if (tiles[y][x] != 'T') { y++; continue; }
+            const int start = y;
+            while (y < MAP_H && tiles[y][x] == 'T') y++;
+            const int len = y - start;
+            if (len >= 2) {
+                logs.push_back({
+                    x * TILE_SIZE + TILE_SIZE / 2.0f,
+                    start * TILE_SIZE + len * TILE_SIZE / 2.0f,
+                    static_cast<float>(len * TILE_SIZE),
+                    true
+                    });
+            }
         }
     }
 
-    for (int y = 9; y < 16; y++)
-    {
-        for (int x = 30; x < 35; x++)
-        {
-            tiles[y][x] = 's';
-        }
-    }
-    for (int y = 2; y < 5; y++)
-    {
-        for (int x = 20; x < 25; x++)
-        {
-            tiles[y][x] = 's';
-        }
-    }
-
-    // スタート
-    for (int y = 1; y < 3; y++)
-    {
-        for (int x = 1; x <3; x++)
-        {
-            tiles[y][x] = 'S';
-        }
-    }
-    //  ゴール
-    for (int y = 17; y < 19; y++)
-    {
-        for (int x = 37; x < 39; x++)
-        {
-            tiles[y][x] = 'G';
-        }
-    }
-
-    // 影タイルの範囲に、葉っぱをランダムに配置(最初に1回だけ決める)
+    // 葉っぱ生成
     leaves.clear();
-    for (int y = 0; y < MAP_H; y++)
-    {
-        for (int x = 0; x < MAP_W; x++)
-        {
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
             if (tiles[y][x] != 's') continue;
-
-            for (int i = 0; i < LEAVES_PER_TILE; i++)
-            {
+            for (int i = 0; i < LEAVES_PER_TILE; i++) {
                 Leaf leaf;
                 leaf.x = static_cast<float>(x * TILE_SIZE + GetRand(TILE_SIZE - 1));
                 leaf.y = static_cast<float>(y * TILE_SIZE + GetRand(TILE_SIZE - 1));
@@ -142,7 +173,6 @@ void Map::Init()
             }
         }
     }
-   
 }
 
 void Map::DrawLogs() const

@@ -8,6 +8,7 @@ namespace {
 	// コマの順番:静止 → 右足前 → 静止 → 左足前 → 静止 の繰り返し
 	constexpr int ANIM_ORDER[5] = { 0, 1, 2, 3, 4 };
 	constexpr int ANIM_INTERVAL = 10;   // 何フレームでコマを変えるか
+
 }
 
 // 角度を -π ～ π （度数　ー１８０°～１８０°）の範囲に収める
@@ -316,4 +317,23 @@ void Enemy::LookAt(float tx, float ty, float dt)
 	// アニメを静止コマに
 	anim_timer = 0;
 	anim_step = 0;
+}
+
+//	エクスクラメーションマークを描く
+void Enemy::DrawAlertMark() const
+{
+	if (!alert) return;
+
+	//	倍率
+	int extend_size = 2;
+
+	// 敵の右上にずらす
+	const int mx = pos_x + 50;
+	const int my = pos_y - 70;
+
+	// 吹き出し風の背景(白い丸+赤い縁
+
+	// 「!」(縦棒+点)
+	DrawBox(mx - 2*extend_size, my - 9*extend_size, mx + 3*extend_size, my + 3*extend_size, GetColor(220, 30, 30), TRUE);
+	DrawBox(mx - 2*extend_size, my + 6*extend_size, mx + 3*extend_size, my + 11*extend_size, GetColor(220, 30, 30), TRUE);
 }

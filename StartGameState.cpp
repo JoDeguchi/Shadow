@@ -4,7 +4,7 @@
 
 void StartGameState::Init()
 {
-	map.Init();
+	map.Init(stage);
 
 	//	プレイヤーのマップスタート地点から
 	float sx = 0.0f, sy = 0.0f;
@@ -12,14 +12,22 @@ void StartGameState::Init()
 	player=Player
 	("data/konohamusi.png", static_cast<int>(sx), static_cast<int>(sy));
 
-	//	すべて初期化
 	enemies.clear();
 	foundEnemy = nullptr;	timer = 0;
 	isFound = false;		isGoal = false;
-	// 敵を配置(タイル座標x, タイル座標y, 種類)
-	enemies.push_back(Enemy(18, 14, 'h'));  // 横巡回の予定
-	enemies.push_back(Enemy(25, 6, 'r'));   // 回転の予定
-	enemies.push_back(Enemy(5, 10, 'v'));   // 縦巡回予定
+
+
+	if (stage == 1) {
+		enemies.push_back(Enemy(18, 14, 'h'));
+		enemies.push_back(Enemy(25, 6, 'r'));
+		enemies.push_back(Enemy(5, 10, 'v'));
+	}
+	else {
+		// 2面の敵(仮。マップに合わせて変更してください)
+		enemies.push_back(Enemy(10, 5, 'h'));
+		enemies.push_back(Enemy(25, 12, 'v'));
+		enemies.push_back(Enemy(30, 4, 'r'));
+	}
 
 	lastTime = GetNowCount();
 }
@@ -62,6 +70,7 @@ void StartGameState::Update()
 		}
 	}
 
+	
 	//------------------------------------------------
 	//	プレイヤー処理とエンディング切替
 
@@ -77,7 +86,7 @@ void StartGameState::Update()
 	//	エンディング切替
 	if (isFound) {
 		timer++;
-		if (timer > 120) {
+		if (timer > 100) {
 			manager->ChangeState(
 				std::make_unique<EndingState>(manager, EndingType::Found)
 			);
@@ -87,10 +96,19 @@ void StartGameState::Update()
 
 	if (isGoal) {
 		timer++;
-		if (timer > 120) {
-			manager->ChangeState(
-				std::make_unique<EndingState>(manager, EndingType::Goal)
-			);
+		if (timer > 100) {
+			if (stage == 1) {
+				// 1面クリア → 2面へ
+				manager->ChangeState(
+					std::make_unique<StartGameState>(manager, 2)
+				);
+			}
+			else {
+				// 2面クリア → エンディングへ
+				manager->ChangeState(
+					std::make_unique<EndingState>(manager, EndingType::Goal)
+				);
+			}
 		}
 	}
 
@@ -117,11 +135,17 @@ void StartGameState::Draw()
 		e.Draw();
 	}
 	
+	// 発見マークは敵より手前に
+	for (const Enemy& e : enemies) {
+		e.DrawAlertMark();
+	}
+
 
 	if (isGoal)
 	{
 		SetFontSize(48);
-		DrawString(480, 280, "GOAL!", GetColor(255, 255, 0));
+		if (stage == 1) DrawString(400, 280, "STAGE1 CLEAR!", GetColor(255, 255, 0));
+		else            DrawString(480, 280, "ALL CLEAR", GetColor(255, 255, 0));
 	}
 
 	if (isFound) {

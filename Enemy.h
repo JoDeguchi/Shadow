@@ -69,4 +69,6 @@ public:
 	bool IsAlert() const { return alert; }
 	// プレイヤーの方を向く(発見後に使う)
 	void LookAt(float tx, float ty, float dt);
+	//	エクスクラメーションマークを描く
+	void DrawAlertMark() const;
 };

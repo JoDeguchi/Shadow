@@ -22,9 +22,11 @@ private:
 
 	int timer = 0;  //  ゴール後もしくは見つかったときのtimer
 
+	int stage = 1;  //  現在のステージ番号
+
 public:
 
-    StartGameState(GameManager* mgr) : GameState(mgr) {}
+    StartGameState(GameManager* mgr, int stage = 1) : GameState(mgr),stage(stage) {}
 
     void Init() override;
     void Input()override;
