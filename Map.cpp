@@ -15,9 +15,7 @@ struct Log {
     bool  vertical;    // true なら縦向き
 };
 
-//  constexprで意図しない値変換バグを防止
 namespace {
-
     //  マップサイズ
     constexpr int TILE_SIZE = 32;
     constexpr int MAP_W = 40;	//	横マスの数
@@ -44,9 +42,6 @@ namespace {
     std::vector<Log> logs;
     constexpr float LOG_THICKNESS = 56.0f;      // 倒木の太さ(px)
 
-    //int kirikabu_hnd = -1;   // 切り株画像のハンドル
-    //double kirikabu_scale = 2.0;
-
      // # 外周の壁 / . 床 / s 影 / S スタート / G ゴール / T 倒木
     const char* STAGE1[MAP_H] = {
         "########################################",
@@ -71,7 +66,7 @@ namespace {
         "########################################",
     };
 
-    // 2面はまず1面のコピーで動作確認(あとで書き換える)
+    // 2面目
     const char* STAGE2[MAP_H] = {
         "########################################",
         "#SS....................................#",
@@ -86,7 +81,7 @@ namespace {
         "#......ssss.T.......TTTTTTTT...........#",
         "#...........T..........................#",
         "#...........T.................sssss....#",
-        "#...........T.................sssss....#",
+        "#...........T..........................#",
         "#sss........T..........................#",
         "#sss..........................sssss....#",
         "#sss...................................#",
@@ -98,6 +93,15 @@ namespace {
 
 void Map::Init(int stage)
 {
+    // ステージ１ならステージ１と三項演算子で分ける
+    const char* const* data = (stage == 1) ? STAGE1 : STAGE2;
+	//  上で決めた data を tiles にコピー
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            tiles[y][x] = data[y][x];
+        }
+    }
+
     //  画像読み込み
     if (leaf_hnd == -1) {
         leaf_hnd = LoadGraph("data/leaf.png");
@@ -108,14 +112,6 @@ void Map::Init(int stage)
     if (log_hnd == -1) {
         log_hnd = LoadGraph("data/touboku.png");
         GetGraphSize(log_hnd, &log_w, &log_h);
-    }
-
-    // 文字列 → タイル
-    const char* const* data = (stage == 1) ? STAGE1 : STAGE2;
-    for (int y = 0; y < MAP_H; y++) {
-        for (int x = 0; x < MAP_W; x++) {
-            tiles[y][x] = data[y][x];
-        }
     }
 
     // 倒木の自動登録
@@ -175,25 +171,7 @@ void Map::Init(int stage)
     }
 }
 
-void Map::DrawLogs() const
-{
-    for (const Log& l : logs)
-    {
-        // 長い辺(log_h = 358)を length に合わせる。縦横共通の拡大率なので歪まない
-        const double rate = l.length / log_h;
-
-        // 元画像が縦長なので、横の倒木のときだけ回転する
-        const double angle = l.vertical ? 0.0 : DX_PI / 2.0;
-
-        DrawRotaGraph(
-            static_cast<int>(l.cx), static_cast<int>(l.cy),
-            rate, angle,
-            log_hnd, TRUE
-        );
-    }
-   
-}
-
+//  マップ全体描画
 void Map::Draw()
 {
     // ---- パス1:床・壁・ゴール ----
@@ -201,10 +179,11 @@ void Map::Draw()
     {
         for (int x = 0; x < MAP_W; x++)
         {
+			//  ピクセル座標に変換
             const int drawX = x * TILE_SIZE;
             const int drawY = y * TILE_SIZE;
 
-            unsigned int color;
+            int color;
             switch (tiles[y][x])
             {
             case '#': color = GetColor(100, 100, 130); break;
@@ -255,6 +234,26 @@ void Map::Draw()
     }
 }
 
+//  倒木の描画
+void Map::DrawLogs() const
+{
+    for (const Log& l : logs)
+    {
+        // 長い辺(log_h = 358)を length に合わせる。縦横共通の拡大率なので歪まない
+        const double rate = l.length / log_h;
+
+        // 元画像が縦長なので、横の倒木のときだけ回転する
+        const double angle = l.vertical ? 0.0 : DX_PI / 2.0;
+
+        DrawRotaGraph(
+            static_cast<int>(l.cx), static_cast<int>(l.cy),
+            rate, angle,
+            log_hnd, TRUE
+        );
+    }
+
+}
+//  葉っぱの描画
 void Map::DrawLeaves() const
 {
     if (leaf_hnd == -1) return;

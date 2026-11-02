@@ -4,6 +4,7 @@
 
 void StartGameState::Init()
 {
+	//	マップ読み込み
 	map.Init(stage);
 
 	//	プレイヤーのマップスタート地点から
@@ -120,6 +121,7 @@ void StartGameState::Update()
 
 void StartGameState::Draw()
 {
+	//	マップ描画
 	map.Draw();
 	
 	for (const Enemy& e : enemies) {
