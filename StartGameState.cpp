@@ -25,9 +25,11 @@ void StartGameState::Init()
 	}
 	else {
 		// 2面の敵(仮。マップに合わせて変更してください)
-		enemies.push_back(Enemy(10, 5, 'h'));
-		enemies.push_back(Enemy(25, 12, 'v'));
-		enemies.push_back(Enemy(30, 4, 'r'));
+		enemies.push_back(Enemy(5, 7, 'v'));
+		enemies.push_back(Enemy(25, 12, 'h'));
+		enemies.push_back(Enemy(30, 4, 'h'));
+		enemies.push_back(Enemy(20, 12, 'v'));
+		enemies.push_back(Enemy(33, 10, 'r'));
 	}
 
 	lastTime = GetNowCount();

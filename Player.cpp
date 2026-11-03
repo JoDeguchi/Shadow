@@ -9,7 +9,7 @@ namespace {
 	constexpr int FRAME_WIDTH	= 80;
 	constexpr int FRAME_HEIGHT	= 100;
 	// 動きの設定
-	constexpr float MOVE_SPEED		= 3.0f;		// 1フレームに進むpx
+	constexpr float MOVE_SPEED		= 10.0f;		// 1フレームに進むpx
 	constexpr int   ANIM_INTERVAL	= 4;		// 何フレームでコマを変えるか
 	constexpr float DRAW_SCALE		= 1.0f;
 	constexpr int ANIM_ORDER[5] = { 0, 1, 2, 3, 4 };
